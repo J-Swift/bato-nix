@@ -16,6 +16,8 @@ qcow-copy: ensure-target
 	[ -f "./result/nixos.qcow2" ] && rm -f ./_utm/"$(TARGET).qcow2" && cp -L "./result/nixos.qcow2" ./_utm/"$(TARGET).qcow2"
 	utm-rebuild
 
+deploy: ensure-target
+	time nix run .#apps.nixinate.$(TARGET)
 
 ################################################################################
 # Helpers

@@ -10,15 +10,22 @@
       url = "github:nix-community/nixos-generators";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    nixinate = {
+      # url = "github:MatthewCroughan/nixinate";
+      url = "github:J-Swift/nixinate/feature/allow-ssh-config-hostnames";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, flake-utils, nixos-generators }:
+  outputs = { self, nixpkgs, flake-utils, nixos-generators, nixinate }:
     flake-utils.lib.eachDefaultSystem
       (eachSystem:
         let
           pkgs = nixpkgs.legacyPackages.${eachSystem};
         in
         {
+          apps = nixinate.nixinate.${eachSystem} self;
           devShell = import ./shell.nix { inherit pkgs; };
         }
       ) // {
