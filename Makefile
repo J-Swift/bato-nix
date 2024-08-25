@@ -13,7 +13,9 @@ qcow: qcow-build qcow-copy
 qcow-build: ensure-target
 	time nix build .#nixosConfigurations.$(TARGET).config.formats.qcow --json -L | tee $(BUILD_OUT_FILE); exit "$${PIPESTATUS[0]}"
 qcow-copy: ensure-target
-	[ -f "./result/nixos.qcow2" ] && rm -f ./_utm/"$(TARGET).qcow2" && time cp -L "./result/nixos.qcow2" ./_utm/"$(TARGET).qcow2"
+	[ -f "./result/nixos.qcow2" ] && rm -f ./_utm/"$(TARGET).qcow2" && cp -L "./result/nixos.qcow2" ./_utm/"$(TARGET).qcow2"
+	utm-rebuild
+
 
 ################################################################################
 # Helpers
