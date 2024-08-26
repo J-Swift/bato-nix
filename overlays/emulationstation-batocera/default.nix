@@ -18,12 +18,8 @@
 , rapidjson
 , stdenv
 , udev
-  # , google_fonts # needed at runtime
 }:
 
-let
-  # ubuntu_font = google_fonts.override { fonts = "UbuntuCondensed-Regular.ttf"; };
-in
 stdenv.mkDerivation (finalAttrs: {
   pname = "emulationstation-batocera";
 
@@ -37,7 +33,7 @@ stdenv.mkDerivation (finalAttrs: {
     hash = "sha256-uG1q4fvP2AmSTcbFg/G3fFXzGsgwFEzbLOVkr98wsDY=";
   };
 
-  patches = [ ./mypatch.patch ];
+  patches = [ ./001-add-nixos-share-path.patch ];
 
   nativeBuildInputs = [
     SDL2
@@ -77,27 +73,8 @@ stdenv.mkDerivation (finalAttrs: {
     install -Dm755 ../emulationstation $out/bin/emulationstation
     mkdir -p $out/share/emulationstation/
     cp -r ../resources $out/share/emulationstation/
-    # cp -r ../resources $out/bin
-
-    # install -m 0755 -d $out/share/emulationstation/resources/help
-    # install -m 0755 -d $out/share/emulationstation/resources/flags
-    # install -m 0755 -d $out/share/emulationstation/resources/battery
-    # install -m 0755 -d $out/share/emulationstation/resources/services
-    # install -m 0644 -D ../resources/*.* $out/share/emulationstation/resources
-    # install -m 0644 -D ../resources/help/*.* $out/share/emulationstation/resources/help
-    # install -m 0644 -D ../resources/flags/*.* $out/share/emulationstation/resources/flags
-    # install -m 0644 -D ../resources/battery/*.* $out/share/emulationstation/resources/battery
-    # install -m 0644 -D ../resources/services/*.* $out/share/emulationstation/resources/services
 
     runHook preInstall
-  '';
-
-  # es-core/src/resources/ResourceManager.cpp: resources are searched at the
-  # same place of binaries.
-  postFixup = ''
-    pushd $out
-    ln -s $out/share/emulationstation/resources $out/bin/
-    popd
   '';
 
   meta = {

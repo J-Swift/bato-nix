@@ -1,0 +1,43 @@
+diff --git a/es-core/src/Paths.cpp b/es-core/src/Paths.cpp
+index a4e4134e..506b04ee 100644
+--- a/es-core/src/Paths.cpp
++++ b/es-core/src/Paths.cpp
+@@ -20,6 +20,7 @@ Paths::Paths()
+ 	mEmulationStationPath = getExePath();
+ 	mUserEmulationStationPath = Utils::FileSystem::getCanonicalPath(getHomePath() + "/.emulationstation");
+ 	mRootPath = Utils::FileSystem::getParent(getHomePath());
++	mSharePath = "/run/current-system/sw/share";
+ 
+ 	mLogPath = mUserEmulationStationPath;
+ 	mThemesPath = mUserEmulationStationPath + "/themes";
+diff --git a/es-core/src/Paths.h b/es-core/src/Paths.h
+index 8e1c31f0..150af682 100644
+--- a/es-core/src/Paths.h
++++ b/es-core/src/Paths.h
+@@ -60,6 +60,7 @@ public:
+ 	static std::string& getUserManualPath() { return getInstance()->mUserManualPath; }
+ 
+ 	static std::string& getKodiPath() { return getInstance()->mKodiPath; }
++	static std::string& getSharePath() { return getInstance()->mSharePath; }
+ 	
+ 	static std::string& getHomePath();
+ 	static void setHomePath(const std::string& _path);
+@@ -109,4 +110,5 @@ private:
+ 	std::string mUserManualPath;
+ 	std::string mVersionInfoPath;
+ 	std::string mKodiPath;	
++	std::string mSharePath;
+ };
+diff --git a/es-core/src/resources/ResourceManager.cpp b/es-core/src/resources/ResourceManager.cpp
+index 2802dfae..ba33076e 100644
+--- a/es-core/src/resources/ResourceManager.cpp
++++ b/es-core/src/resources/ResourceManager.cpp
+@@ -71,6 +71,8 @@ std::vector<std::string> ResourceManager::getResourcePaths() const
+ 		auto cwd = Utils::FileSystem::getCWDPath() + "/resources";
+ 		if (std::find(_cachedPaths.cbegin(), _cachedPaths.cend(), cwd) == _cachedPaths.cend())
+ 			_cachedPaths.push_back(cwd);
++
++		_cachedPaths.push_back(Paths::getSharePath() + "/emulationstation/resources");
+ 	}
+ 
+ 	return _cachedPaths;
