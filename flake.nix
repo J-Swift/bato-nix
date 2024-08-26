@@ -13,7 +13,7 @@
 
     nixinate = {
       # url = "github:MatthewCroughan/nixinate";
-      url = "github:J-Swift/nixinate/feature/allow-ssh-config-hostnames";
+      url = "github:J-Swift/nixinate/fix/macos-shm";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -28,14 +28,16 @@
           apps = nixinate.nixinate.${eachSystem} self;
           devShell = import ./shell.nix { inherit pkgs; };
         }
-      ) // {
+      ) //
+    {
       nixosConfigurations =
         let
           bato-system = "x86_64-linux";
-          stateVersion = "23.11";
+          hostname = "bato-nix";
+          stateVersion = "24.11";
         in
         {
-          bato-nix =
+          ${hostname} =
             let
             in nixpkgs.lib.nixosSystem
               rec {
@@ -49,17 +51,80 @@
 
                 modules = [
                   {
+                    _module.args.nixinate = {
+                      host = "192.168.64.9";
+                      sshUser = "root";
+                      buildOn = "remote";
+                      substituteOnTarget = true;
+                      hermetic = false;
+                    };
+                  }
+
+                  {
+                    imports = [
+                      nixos-generators.nixosModules.all-formats
+                    ];
+                  }
+
+                  # boot loader
+                  {
+                    boot.initrd.availableKernelModules = [ "xhci_pci" "uhci_hcd" "ehci_pci" "ahci" "usbhid" "sd_mod" ];
+                    boot.initrd.kernelModules = [ ];
+                    boot.kernelModules = [ ];
+                    boot.extraModulePackages = [ ];
+
+                    boot.growPartition = true;
+
+                    boot.loader.grub = {
+                      enable = true;
+                      device = "nodev";
+                      efiSupport = true;
+                      efiInstallAsRemovable = true;
+
+                      useOSProber = false;
+                      configurationLimit = 10;
+                    };
+                  }
+
+                  {
+                    fileSystems."/" = {
+                      device = "/dev/disk/by-label/nixos";
+                      fsType = "ext4";
+                      autoResize = true;
+                    };
+
+                    fileSystems."/boot" = {
+                      device = "/dev/disk/by-label/ESP";
+                      fsType = "vfat";
+                    };
+
+                    swapDevices = [ ];
+
+                    # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
+                    # (the default) this is the recommended approach. When using systemd-networkd it's
+                    # still possible to use this option, but it's recommended to use it in conjunction
+                    # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
+                    networking.useDHCP = true;
+                    # networking.interfaces.enp0s1.useDHCP = lib.mkDefault true;
+
+                    nixpkgs.hostPlatform = "x86_64-linux";
+
+                    boot.loader.grub.enable = true;
+
                     system.stateVersion = stateVersion;
                     boot.kernelPackages = pkgs.linuxPackages_6_10;
 
-                    users.users.root.password = "linux";
+                    users.users.root = {
+                      password = "linux";
 
-                    time.timeZone = "America/New_York";
-                    services.openssh = {
-                      enable = true;
-                      settings.PermitRootLogin = "yes";
+                      openssh.authorizedKeys.keys = [
+                        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINpmysyMziDLKjj2Faps0jl0aTZETR67zlJmeuSLOR75 jimmy@MbpHal.local"
+                      ];
                     };
-                    networking.hostName = "bato-nix";
+
+                    services.openssh.enable = true;
+                    time.timeZone = "America/New_York";
+                    networking.hostName = hostname;
 
                     i18n.defaultLocale = "en_US.UTF-8";
 
@@ -98,11 +163,11 @@
                         what = "http://localhost:9843";
                         where = "/mnt/utm-shared";
 
-                        wantedBy = [ "multi-user.target" ];
+                        after = [ "network-online.target" ];
+                        wants = [ "network-online.target" ];
 
                         type = "davfs";
-                        # options = "noauto,_netdev,x-systemd.automount,cache=none,credentials=/etc/davfs${secretsPath}/cifs-credentials.txt";
-                        options = "noauto,x-systemd.automount";
+                        options = "x-systemd.automount";
 
                         mountConfig = {
                           DirectoryMode = "0777";
@@ -115,11 +180,9 @@
                       {
                         where = "/mnt/utm-shared";
 
-                        after = [ "remote-fs-pre.target" ];
-                        wants = [ "remote-fs-pre.target" ];
-                        conflicts = [ "umount.target" ];
-                        before = [ "umount.target" ];
-                        wantedBy = [ "remote-fs.target" ];
+                        after = [ "network-online.target" ];
+                        wants = [ "network-online.target" ];
+                        wantedBy = [ "multi-user.target" ];
 
                         unitConfig = {
                           DefaultDependencies = "no";
@@ -131,14 +194,6 @@
                         };
                       }
                     ];
-                  }
-
-                  {
-                    imports = [
-                      nixos-generators.nixosModules.all-formats
-                    ];
-
-                    formatConfigs.qcow = { config, lib, ... }: { };
                   }
 
                   {

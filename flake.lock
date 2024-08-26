@@ -18,6 +18,27 @@
         "type": "github"
       }
     },
+    "nixinate": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1724553370,
+        "narHash": "sha256-xY3wSH38zzmDQ4JMbhgOJfbCjN8gGg8N4YnnZSyGp9o=",
+        "owner": "J-Swift",
+        "repo": "nixinate",
+        "rev": "e463ebdf65319432c93d7e6e8b9c6d2fb762ef26",
+        "type": "github"
+      },
+      "original": {
+        "owner": "J-Swift",
+        "ref": "fix/macos-shm",
+        "repo": "nixinate",
+        "type": "github"
+      }
+    },
     "nixlib": {
       "locked": {
         "lastModified": 1723942470,
@@ -73,6 +94,7 @@
     "root": {
       "inputs": {
         "flake-utils": "flake-utils",
+        "nixinate": "nixinate",
         "nixos-generators": "nixos-generators",
         "nixpkgs": "nixpkgs"
       }

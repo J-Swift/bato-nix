@@ -16,7 +16,7 @@ let
       set baseVm to virtual machine named "bato-base"
       set qcow to POSIX file "/Users/jimmy/Developer/bato-nix/_utm/bato-nix.qcow2"
 
-      duplicate baseVm with properties {configuration:{name:"bato-nix", architecture:"x86_64", uefi:false, drives:{{source:qcow}}}}
+      duplicate baseVm with properties {configuration:{name:"bato-nix", architecture:"x86_64", uefi:true, drives:{{source:qcow}}}}
     end tell
   '';
 in
