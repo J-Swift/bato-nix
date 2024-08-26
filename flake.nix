@@ -64,9 +64,11 @@
                     _module.args.nixinate = {
                       host = "192.168.64.9";
                       sshUser = "root";
-                      buildOn = "remote";
-                      substituteOnTarget = true;
+                      buildOn = "local";
+                      substituteOnTarget = false;
                       hermetic = false;
+                      nixOptions = [ "--fast" ];
+                      flockPath = "/tmp";
                     };
                   }
 
