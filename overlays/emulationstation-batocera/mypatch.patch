@@ -1,0 +1,78 @@
+diff --git a/es-core/src/resources/ResourceManager.cpp b/es-core/src/resources/ResourceManager.cpp
+index 2802dfae..3924e178 100644
+--- a/es-core/src/resources/ResourceManager.cpp
++++ b/es-core/src/resources/ResourceManager.cpp
+@@ -38,6 +38,7 @@ std::vector<std::string> ResourceManager::getResourcePaths() const
+ 	std::unique_lock<std::mutex> lock(_cacheBuildLock);
+ 	if (_cachedPaths.size() == 0 || _cachedThemeSet != themeSet)
+ 	{	
++		LOG(LogError) << ">>> <<<";
+ 		_cachedThemeSet = themeSet;
+ 		_cachedPaths.clear();
+ 		_resourcePathCache.clear();
+@@ -45,32 +46,65 @@ std::vector<std::string> ResourceManager::getResourcePaths() const
+ 		// check if theme overrides default resources
+ 		if (!Paths::getUserThemesPath().empty())
+ 		{
++			LOG(LogError) << "Adding user themes path [" << Paths::getUserThemesPath() << "]";
+ 			std::string themePath = Paths::getUserThemesPath() + "/" + themeSet + "/resources";
+ 			if (Utils::FileSystem::isDirectory(themePath))
+ 				_cachedPaths.push_back(themePath);
+ 		}
++		else
++		{
++			LOG(LogError) << "User themes path empty";
++		}
+ 
+ 		if (!Paths::getThemesPath().empty())
+ 		{
++			LOG(LogError) << "Adding themes path [" << Paths::getThemesPath() << "]";
+ 			std::string roThemePath = Paths::getThemesPath() + "/" + themeSet + "/resources";
+ 			if (Utils::FileSystem::isDirectory(roThemePath))
+ 				_cachedPaths.push_back(roThemePath);
+ 		}
++		else
++		{
++			LOG(LogError) << "Themes path empty";
++		}
+ 
++		LOG(LogError) << "Adding home path [" << Paths::getUserEmulationStationPath() << "]";
+ 		// check in homepath
+ 		_cachedPaths.push_back(Paths::getUserEmulationStationPath() + "/resources");
+ 
++		LOG(LogError) << "Adding emustation path [" << Paths::getEmulationStationPath() << "]";
+ 		// check in emulationStation path
+ 		_cachedPaths.push_back(Paths::getEmulationStationPath() + "/resources");
+ 
+ 		// check in Exe path
+ 		if (Paths::getEmulationStationPath() != Paths::getExePath())
++		{
++			LOG(LogError) << "Adding exe path [" << Paths::getExePath() << "]";
+ 			_cachedPaths.push_back(Paths::getExePath() + "/resources");
++		}
++		else
++		{
++			LOG(LogError) << "Exe path was the same as emustation path";
++		}
+ 
+ 		// check in cwd
+ 		auto cwd = Utils::FileSystem::getCWDPath() + "/resources";
+ 		if (std::find(_cachedPaths.cbegin(), _cachedPaths.cend(), cwd) == _cachedPaths.cend())
++		{
++			LOG(LogError) << "Adding cwd [" << Utils::FileSystem::getCWDPath() << "]";
+ 			_cachedPaths.push_back(cwd);
++		}
++		else
++		{
++			LOG(LogError) << "Cwd not added [" << Utils::FileSystem::getCWDPath() << "]";
++		}
++		LOG(LogError) << "--------";
++
++		for (auto testPath : _cachedPaths)
++		{
++			LOG(LogError) << ">>> test path [" << testPath << "]";
++		}
++		LOG(LogError) << ">>> <<<";
+ 	}
+ 
+ 	return _cachedPaths;

@@ -47,6 +47,16 @@
                   inherit system;
 
                   config.allowUnfree = true;
+                  # emulationstation-batocera dependency
+                  config.permittedInsecurePackages = [
+                    "freeimage-unstable-2021-11-01"
+                  ];
+
+                  overlays = [
+                    (final: prev: {
+                      emulationstation-batocera = pkgs.callPackage ./overlays/emulationstation-batocera { };
+                    })
+                  ];
                 };
 
                 modules = [
@@ -197,6 +207,14 @@
                   }
 
                   {
+                    nix = {
+                      package = pkgs.nixVersions.latest;
+                      extraOptions = ''
+                        experimental-features = nix-command flakes
+                        bash-prompt-prefix = [flake]\040
+                      '';
+                    };
+
                     services.displayManager.autoLogin = {
                       enable = true;
                       user = "root";
@@ -211,6 +229,10 @@
                   }
 
                   {
+                    environment.systemPackages = [
+                      pkgs.vim
+                    ];
+
                     systemd.tmpfiles.rules = map
                       (mountPath: "d /userdata/${mountPath} 0777")
                       [
@@ -225,6 +247,10 @@
                   {
                     imports = [
                       ./profiles/systems/psx
+                    ];
+
+                    environment.systemPackages = [
+                      pkgs.emulationstation-batocera
                     ];
 
                     bato.systems.psx.enable = true;
