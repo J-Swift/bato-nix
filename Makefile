@@ -1,4 +1,5 @@
 TARGET = bato-nix
+TARGET_IP = 192.168.64.9
 
 BUILD_STORE = wsl-proxy-vm
 BUILD_OUT_FILE = .last_build.txt
@@ -21,6 +22,11 @@ qcow-copy: ensure-target
 deploy: ensure-target
 	time nix run .#nixinate.$(TARGET)
 
+deploy-proxy: ensure-target ensure-target-ip
+	time nix build .#nixosConfigurations.$(TARGET).config.system.build.toplevel --eval-store auto --store 'ssh-ng://$(BUILD_STORE)' --json -L | tee $(BUILD_OUT_FILE); exit "$${PIPESTATUS[0]}"
+	IMG_PATH=$(shell cat $(BUILD_OUT_FILE) | jq .[].outputs.out -r ); [ ! -z "$$IMG_PATH" ] && time nix copy --from 'ssh-ng://$(BUILD_STORE)' --to 'ssh-ng://$(TARGET_IP)' $$IMG_PATH
+	$(MAKE) deploy TARGET=$(TARGET)
+
 ################################################################################
 # Helpers
 ################################################################################
@@ -28,4 +34,9 @@ deploy: ensure-target
 ensure-target:
 ifndef TARGET
 	$(error TARGET is undefined)
+endif
+
+ensure-target-ip:
+ifndef TARGET_IP
+	$(error TARGET_IP is undefined)
 endif
