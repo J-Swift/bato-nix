@@ -105,7 +105,14 @@ stdenv.mkDerivation (finalAttrs: {
     homepage = "https://github.com/batocera-linux/batocera-emulationstation";
     license = lib.licenses.mit;
     mainProgram = "emulationstation-batocera";
-    maintainers = with lib.maintainers; [ AndersonTorres edwtjo ];
+    maintainers = [
+      {
+        email = "jimmyqpublik@gmail.com";
+        github = "J-Swift";
+        githubId = 734158;
+        name = "Jimmy Reichley";
+      }
+    ];
     platforms = lib.platforms.unix ++ lib.platforms.windows;
   };
 })
