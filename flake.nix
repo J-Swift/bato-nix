@@ -225,7 +225,7 @@
                     services.xserver = {
                       enable = true;
 
-                      desktopManager.mate.enable = true;
+                      desktopManager.lxqt.enable = true;
                       displayManager.lightdm.enable = true;
                     };
                   }
@@ -235,20 +235,70 @@
                       pkgs.vim
                     ];
 
+                    # │── bios
+                    #       ... bios files ...
+                    # ├── cheats
+                    # │   └── cht
+                    # ├── decorations
+                    # │   └── readme.txt
+                    # ├── extractions
+                    # │   └── lisez-moi.txt
+                    # ├── kodi
+                    # │   ├── movies
+                    # │   ├── music
+                    # │   └── pictures
+                    # ├── library
+                    # │   └── readme.txt
+                    # ├── music
+                    # │   └── readme.txt
+                    # ├── roms
+                    #       ... ES folders ...
+                    # ├── saves
+                    # │   ├── duckstation
+                    # │   ├── lisez-moi.txt
+                    # │   ├── readme.txt
+                    # │   └── snes
+                    # ├── screenshots
+                    # │   ├── lisez-moi.txt
+                    # │   └── readme.txt
+                    # ├── splash
+                    # │   └── readme.txt
+                    # ├── system
+                    # │   ├── batocera.conf
+                    # │   ├── bluetooth
+                    # │   ├── configs
+                    # │   ├── data.version
+                    # │   ├── logs
+                    # │   ├── machine-id
+                    # │   ├── pacman
+                    # │   ├── ssh
+                    # │   └── udev
+                    # └── themes
+
+
                     systemd.tmpfiles.rules = map
-                      (mountPath: "d /userdata/${mountPath} 0777")
+                      (mountPath: "d /userdata/${mountPath} 0755")
                       [
                         "bios"
-                        "system"
                         "cheats"
-                        "saves"
+                        "decorations"
+                        "extractions"
+                        # "kodi"
+                        "library"
+                        "music"
                         "roms"
+                        "saves"
+                        "screenshots"
+                        "splash"
+                        "system"
+                        "themes"
                       ];
                   }
 
                   {
                     imports = [
                       ./profiles/systems/psx
+                      ./profiles/systems/snes
                     ];
 
                     environment.systemPackages = [
@@ -256,6 +306,7 @@
                     ];
 
                     bato.systems.psx.enable = true;
+                    bato.systems.snes.enable = true;
                   }
                 ];
               };
