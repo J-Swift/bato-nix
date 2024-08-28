@@ -1,0 +1,109 @@
+diff --git a/es-app/src/main.cpp b/es-app/src/main.cpp
+index 98418f8b..3e8efb74 100644
+--- a/es-app/src/main.cpp
++++ b/es-app/src/main.cpp
+@@ -325,7 +325,7 @@ int setLocale(char * argv1)
+ 	if (Utils::FileSystem::exists("./locale/lang")) // for local builds
+ 		EsLocale::init("", "./locale/lang");	
+ 	else
+-		EsLocale::init("", "/usr/share/locale");	
++		EsLocale::init("", Paths::getSharePath() + "/locale");
+ #endif
+ 
+ 	setlocale(LC_TIME, "");
+diff --git a/es-core/src/Paths.cpp b/es-core/src/Paths.cpp
+index a4e4134e..feb64a28 100644
+--- a/es-core/src/Paths.cpp
++++ b/es-core/src/Paths.cpp
+@@ -20,6 +20,7 @@ Paths::Paths()
+ 	mEmulationStationPath = getExePath();
+ 	mUserEmulationStationPath = Utils::FileSystem::getCanonicalPath(getHomePath() + "/.emulationstation");
+ 	mRootPath = Utils::FileSystem::getParent(getHomePath());
++	mSharePath = "/run/current-system/sw/share";
+ 
+ 	mLogPath = mUserEmulationStationPath;
+ 	mThemesPath = mUserEmulationStationPath + "/themes";
+@@ -37,29 +38,29 @@ Paths::Paths()
+ 
+ #if BATOCERA
+ 	mRootPath = "/userdata";
+-	mEmulationStationPath = "/usr/share/emulationstation";
++	mEmulationStationPath = mSharePath + "/emulationstation";
+ 	mUserEmulationStationPath = "/userdata/system/configs/emulationstation";
+ 
+ 	mLogPath = "/userdata/system/logs";
+ 	mScreenShotsPath = "/userdata/screenshots";
+ 	mSaveStatesPath = "/userdata/saves";
+-	mMusicPath = "/usr/share/batocera/music";
++	mMusicPath = mSharePath + "/batocera/music";
+ 	mUserMusicPath = "/userdata/music";
+-	mThemesPath = "/usr/share/emulationstation/themes";
++	mThemesPath = mSharePath + "/emulationstation/themes";
+ 	mUserThemesPath = "/userdata/themes";
+-	mKeyboardMappingsPath = "/usr/share/evmapy";
++	mKeyboardMappingsPath = mSharePath + "/evmapy";
+ 	mUserKeyboardMappingsPath = "/userdata/system/configs/evmapy";
+-	mDecorationsPath = "/usr/share/batocera/datainit/decorations";
++	mDecorationsPath = mSharePath + "/batocera/datainit/decorations";
+ 	mUserDecorationsPath = "/userdata/decorations";
+-	mShadersPath = "/usr/share/batocera/shaders/configs";
++	mShadersPath = mSharePath + "/batocera/shaders/configs";
+ 	mUserShadersPath = "/userdata/shaders/configs";
+-	mTimeZonesPath = "/usr/share/zoneinfo/";
+-	mRetroachivementSounds = "/usr/share/libretro/assets/sounds";
++	mTimeZonesPath = mSharePath + "/zoneinfo/";
++	mRetroachivementSounds = mSharePath + "/libretro/assets/sounds";
+ 	mUserRetroachivementSounds = "/userdata/sounds/retroachievements";
+ 	
+ 	mSystemConfFilePath = "/userdata/system/batocera.conf";
+-	mUserManualPath = "/usr/share/batocera/doc/notice.pdf";
+-	mVersionInfoPath = "/usr/share/batocera/batocera.version";
++	mUserManualPath = mSharePath + "/batocera/doc/notice.pdf";
++	mVersionInfoPath = mSharePath + "/batocera/batocera.version";
+ 	mKodiPath = "/usr/bin/kodi";
+ #endif
+ 
+diff --git a/es-core/src/Paths.h b/es-core/src/Paths.h
+index 8e1c31f0..150af682 100644
+--- a/es-core/src/Paths.h
++++ b/es-core/src/Paths.h
+@@ -60,6 +60,7 @@ public:
+ 	static std::string& getUserManualPath() { return getInstance()->mUserManualPath; }
+ 
+ 	static std::string& getKodiPath() { return getInstance()->mKodiPath; }
++	static std::string& getSharePath() { return getInstance()->mSharePath; }
+ 	
+ 	static std::string& getHomePath();
+ 	static void setHomePath(const std::string& _path);
+@@ -109,4 +110,5 @@ private:
+ 	std::string mUserManualPath;
+ 	std::string mVersionInfoPath;
+ 	std::string mKodiPath;	
++	std::string mSharePath;
+ };
+diff --git a/es-core/src/resources/ResourceManager.cpp b/es-core/src/resources/ResourceManager.cpp
+index 2802dfae..ba33076e 100644
+--- a/es-core/src/resources/ResourceManager.cpp
++++ b/es-core/src/resources/ResourceManager.cpp
+@@ -71,6 +71,8 @@ std::vector<std::string> ResourceManager::getResourcePaths() const
+ 		auto cwd = Utils::FileSystem::getCWDPath() + "/resources";
+ 		if (std::find(_cachedPaths.cbegin(), _cachedPaths.cend(), cwd) == _cachedPaths.cend())
+ 			_cachedPaths.push_back(cwd);
++
++		_cachedPaths.push_back(Paths::getSharePath() + "/emulationstation/resources");
+ 	}
+ 
+ 	return _cachedPaths;
+diff --git a/es-core/src/utils/Platform.cpp b/es-core/src/utils/Platform.cpp
+index b51b0be6..986c641b 100644
+--- a/es-core/src/utils/Platform.cpp
++++ b/es-core/src/utils/Platform.cpp
+@@ -524,7 +524,7 @@ namespace Utils
+ #if WIN32
+ 			return "windows";
+ #else
+-			std::string arch = Utils::FileSystem::readAllText("/usr/share/batocera/batocera.arch");
++			std::string arch = Utils::FileSystem::readAllText(Paths::getSharePath() + "/batocera/batocera.arch");
+ 			if (!arch.empty())
+ 				return arch;
+ 

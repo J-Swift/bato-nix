@@ -292,7 +292,8 @@
                         "saves"
                         "screenshots"
                         "splash"
-                        "system"
+                        "system/configs"
+                        "system/logs"
                         "themes"
                       ];
                   }

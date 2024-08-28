@@ -32,8 +32,12 @@ stdenv.mkDerivation (finalAttrs: {
     fetchSubmodules = true;
     hash = "sha256-uG1q4fvP2AmSTcbFg/G3fFXzGsgwFEzbLOVkr98wsDY=";
   };
+  patches = [
+    ./001-replace-usr-share.patch
+  ];
 
-  patches = [ ./001-add-nixos-share-path.patch ];
+  # src = /Users/jimmy/tmp/batocera-emulationstation;
+  # unpackCmd = "cp -r $curSrc .";
 
   nativeBuildInputs = [
     SDL2
