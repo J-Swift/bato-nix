@@ -231,8 +231,10 @@
                   }
 
                   {
+                    environment.enableDebugInfo = true;
                     environment.systemPackages = [
                       pkgs.vim
+                      pkgs.gdb
                     ];
 
                     # │── bios

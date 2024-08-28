@@ -50,8 +50,6 @@ stdenv.mkDerivation (finalAttrs: {
     curl
     freeimage
     freetype
-    libcec
-    libcec_platform
     libGL
     libGLU
     libvlc
@@ -60,10 +58,20 @@ stdenv.mkDerivation (finalAttrs: {
   ];
 
   strictDeps = true;
+  dontStrip = true;
 
+  cmakeBuildType = "Debug";
   env.NIX_CFLAGS_COMPILE = "-I${lib.getDev SDL2_mixer}/include/SDL2";
   cmakeFlags = [
+    # (lib.cmakeFeature "CMAKE_BUILD_TYPE" "Debug")
+    (lib.cmakeBool "BATOCERA" true)
+    (lib.cmakeFeature "CMAKE_C_FLAGS" "-DX86_64")
+    (lib.cmakeFeature "CMAKE_C_FLAGS" "-g")
+    (lib.cmakeFeature "CMAKE_CXX_FLAGS" "-DX86_64")
+    (lib.cmakeFeature "CMAKE_CXX_FLAGS" "-g")
     (lib.cmakeFeature "OpenGL_GL_PREFERENCE" "LEGACY")
+    (lib.cmakeBool "DISABLE_KODI" true)
+    (lib.cmakeBool "CEC" false)
     (lib.cmakeBool "GL" true)
   ];
 
@@ -74,7 +82,7 @@ stdenv.mkDerivation (finalAttrs: {
     mkdir -p $out/share/emulationstation/
     cp -r ../resources $out/share/emulationstation/
 
-    runHook preInstall
+    runHook postInstall
   '';
 
   meta = {
