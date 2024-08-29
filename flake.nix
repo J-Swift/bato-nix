@@ -16,9 +16,14 @@
       url = "github:J-Swift/nixinate/fix/macos-shm";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    batocera-src = {
+      url = "github:batocera-linux/batocera.linux?ref=batocera-39";
+      flake = false;
+    };
   };
 
-  outputs = { self, nixpkgs, flake-utils, nixos-generators, nixinate }:
+  outputs = { self, nixpkgs, flake-utils, nixos-generators, nixinate, batocera-src }:
     flake-utils.lib.eachDefaultSystem
       (eachSystem:
         let
@@ -27,6 +32,7 @@
         {
           apps = nixinate.nixinate.${eachSystem} self;
           devShell = import ./shell.nix { inherit pkgs; };
+          # packages.batocera = pkgs.callPackage ./packages/batocera { inherit batocera-src; };
         }
       ) //
     {
@@ -55,6 +61,7 @@
                   overlays = [
                     (final: prev: {
                       emulationstation-batocera = pkgs.callPackage ./overlays/emulationstation-batocera { };
+                      batocera = pkgs.callPackage ./packages/batocera { inherit batocera-src; };
                     })
                   ];
                 };
@@ -278,6 +285,7 @@
                     # └── themes
 
 
+                    # TODO(jpr): copy userinit service from bato
                     systemd.tmpfiles.rules = map
                       (mountPath: "d /userdata/${mountPath} 0755")
                       [
@@ -305,6 +313,7 @@
                     ];
 
                     environment.systemPackages = [
+                      pkgs.batocera
                       pkgs.emulationstation-batocera
                     ];
 

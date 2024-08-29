@@ -8,15 +8,12 @@ let
 
     src = ./baked-roms;
 
-    # test = pkgs.writeText "test" ''
-    #   hello world
-    # '';
-
     installPhase = ''
       runHook preInstall
 
       mkdir -p $out/share/snes-static-data
       cp -r $src/* $out/share/snes-static-data/
+      # ${pkgs.rsync}/bin/rsync -a ${pkgs.batocera}/opt/roms/ /userdata/roms/
 
       runHook postInstall
     '';
@@ -31,10 +28,6 @@ let
       rev = "6b868454cad63296a3f36b1d3c5307d60f23ac2b";
       hash = "sha256-6YfQzy6ednKu3cGuQ1FsL4W+lxymVVVOwOt9ePUXeEQ=";
     };
-
-    # test = pkgs.writeText "test" ''
-    #   hello world
-    # '';
 
     installPhase = ''
       runHook preInstall
@@ -59,10 +52,6 @@ in
   ];
 
   config = lib.mkIf cfg.enable {
-    environment.etc."emulationstation/es_systems.cfg" = {
-      source = ./es_systems.cfg;
-    };
-
     environment.systemPackages = [
       static-data
       carbon-theme

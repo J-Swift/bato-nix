@@ -1,5 +1,22 @@
 {
   "nodes": {
+    "batocera-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1709582447,
+        "narHash": "sha256-yC09lv10xXlA0xXWDZL5QLb3A5cgWu/rf5DtfBF2DYE=",
+        "owner": "batocera-linux",
+        "repo": "batocera.linux",
+        "rev": "9cbda965212c51ecebb4b79c2b77c91f55715bb7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "batocera-linux",
+        "ref": "batocera-39",
+        "repo": "batocera.linux",
+        "type": "github"
+      }
+    },
     "flake-utils": {
       "inputs": {
         "systems": "systems"
@@ -93,6 +110,7 @@
     },
     "root": {
       "inputs": {
+        "batocera-src": "batocera-src",
         "flake-utils": "flake-utils",
         "nixinate": "nixinate",
         "nixos-generators": "nixos-generators",
