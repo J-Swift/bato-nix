@@ -1,3 +1,8 @@
+# TODO(jpr): configgen
+# TODO(jpr): emulatorlauncher
+# TODO(jpr): batocera-config
+# TODO(jpr): batocera-settings-get
+# TODO(jpr): batocera-settings-set
 {
   description = "Bato-nix";
 
@@ -244,66 +249,19 @@
                       pkgs.gdb
                     ];
 
-                    # │── bios
-                    #       ... bios files ...
-                    # ├── cheats
-                    # │   └── cht
-                    # ├── decorations
-                    # │   └── readme.txt
-                    # ├── extractions
-                    # │   └── lisez-moi.txt
-                    # ├── kodi
-                    # │   ├── movies
-                    # │   ├── music
-                    # │   └── pictures
-                    # ├── library
-                    # │   └── readme.txt
-                    # ├── music
-                    # │   └── readme.txt
-                    # ├── roms
-                    #       ... ES folders ...
-                    # ├── saves
-                    # │   ├── duckstation
-                    # │   ├── lisez-moi.txt
-                    # │   ├── readme.txt
-                    # │   └── snes
-                    # ├── screenshots
-                    # │   ├── lisez-moi.txt
-                    # │   └── readme.txt
-                    # ├── splash
-                    # │   └── readme.txt
-                    # ├── system
-                    # │   ├── batocera.conf
-                    # │   ├── bluetooth
-                    # │   ├── configs
-                    # │   ├── data.version
-                    # │   ├── logs
-                    # │   ├── machine-id
-                    # │   ├── pacman
-                    # │   ├── ssh
-                    # │   └── udev
-                    # └── themes
+                    systemd.tmpfiles.rules = [
+                      "d /userdata 0755"
+                    ];
 
+                    systemd.services."rcS" = {
+                      wantedBy = [ "multi-user.target" ];
 
-                    # TODO(jpr): copy userinit service from bato
-                    systemd.tmpfiles.rules = map
-                      (mountPath: "d /userdata/${mountPath} 0755")
-                      [
-                        "bios"
-                        "cheats"
-                        "decorations"
-                        "extractions"
-                        # "kodi"
-                        "library"
-                        "music"
-                        "roms"
-                        "saves"
-                        "screenshots"
-                        "splash"
-                        "system/configs"
-                        "system/logs"
-                        "themes"
-                      ];
+                      serviceConfig = {
+                        Type = "oneshot";
+                        RemainAfterExit = true;
+                        ExecStart = "/bin/sh ${pkgs.batocera}/init.d/rcS";
+                      };
+                    };
                   }
 
                   {
