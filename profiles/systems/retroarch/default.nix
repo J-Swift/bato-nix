@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, batocera-src, ... }:
 
 let
   cfg = config.bato.systems.retroarch;
@@ -29,6 +29,8 @@ in
       in
       [
         retro-with-cores
+        (pkgs.callPackage ./shaders/batocera-shaders { inherit batocera-src; })
+        (pkgs.callPackage ./libretro-core-info { })
       ];
   };
 }

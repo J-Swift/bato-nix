@@ -17,7 +17,6 @@
     };
 
     nixinate = {
-      # url = "github:MatthewCroughan/nixinate";
       url = "github:J-Swift/nixinate/fix/macos-shm";
       inputs.nixpkgs.follows = "nixpkgs";
     };
@@ -37,7 +36,6 @@
         {
           apps = nixinate.nixinate.${eachSystem} self;
           devShell = import ./shell.nix { inherit pkgs; };
-          # packages.batocera = pkgs.callPackage ./packages/batocera { inherit batocera-src; };
         }
       ) //
     {
@@ -83,8 +81,6 @@
                       batocera-resolution = pkgs.callPackage ./packages/batocera/core/batocera-resolution { inherit batocera-src; };
 
                       emulationstation-batocera = pkgs.callPackage ./overlays/emulationstation-batocera { };
-
-                      batocera-shaders = pkgs.callPackage ./profiles/systems/retroarch/shaders/batocera-shaders { inherit batocera-src; };
                     })
                   ];
                 };
@@ -293,13 +289,14 @@
                       pkgs.batocera-resolution
 
                       pkgs.emulationstation-batocera
-                      pkgs.batocera-shaders
                     ];
 
                     bato.systems.psx.enable = true;
                     bato.systems.snes.enable = true;
                   }
                 ];
+
+                specialArgs = { inherit batocera-src; };
               };
         };
     };
