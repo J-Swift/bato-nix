@@ -64,6 +64,20 @@
                   ];
 
                   overlays = [
+                    # buildroot
+                    (final: prev: {
+                      xorg = prev.xorg.overrideScope (xfinal: xprev: {
+                        xrandr = xprev.xrandr.overrideAttrs (finalAttrs: prevAttrs: {
+                          patches = (prevAttrs.patches or [ ]) ++ [
+                            "${batocera-src}/board/batocera/patches/xapp_xrandr/xapp_xrandr-001-listOutputs.patch"
+                            "${batocera-src}/board/batocera/patches/xapp_xrandr/xapp_xrandr-001-listResolutions.patch"
+                            "${batocera-src}/board/batocera/patches/xapp_xrandr/xapp_xrandr-002-getRotation.patch"
+                          ];
+                        });
+                      });
+                    })
+
+                    # batocera.linux
                     (final: prev: {
                       batocera = pkgs.callPackage ./packages/batocera { inherit batocera-src; };
                       batocera-resolution = pkgs.callPackage ./packages/batocera/core/batocera-resolution { inherit batocera-src; };
