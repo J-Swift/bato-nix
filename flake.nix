@@ -1,8 +1,5 @@
-# TODO(jpr): configgen
-# TODO(jpr): emulatorlauncher
 # TODO(jpr): batocera-config
-# TODO(jpr): batocera-settings-get
-# TODO(jpr): batocera-settings-set
+# TODO(jpr): magnohud
 {
   description = "Bato-nix";
 
@@ -81,6 +78,8 @@
                       batocera-resolution = pkgs.callPackage ./packages/batocera/core/batocera-resolution { inherit batocera-src; };
 
                       emulationstation-batocera = pkgs.callPackage ./overlays/emulationstation-batocera { };
+
+                      batocera-settings = pkgs.callPackage ./packages/batocera/core/batocera-settings { inherit batocera-src; };
                     })
                   ];
                 };
@@ -287,6 +286,7 @@
                     environment.systemPackages = [
                       pkgs.batocera
                       pkgs.batocera-resolution
+                      pkgs.batocera-settings
 
                       pkgs.emulationstation-batocera
                     ];
