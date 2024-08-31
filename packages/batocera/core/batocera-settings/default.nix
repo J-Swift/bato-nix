@@ -1,4 +1,3 @@
-# package/batocera/core/batocera-settings
 { lib
 , stdenv
 , batocera-src

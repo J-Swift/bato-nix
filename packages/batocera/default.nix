@@ -1,13 +1,13 @@
 { lib
-, writeTextFile
 , stdenv
+, batocera-src
 , makeWrapper
-, python311Packages
+, writeTextFile
 
 , python311
+, python311Packages
 , rsync
 
-, batocera-src
 , emus ? [ "BR2_PACKAGE_LIBRETRO_SNES9X" ]
 }:
 
@@ -32,7 +32,11 @@ let
     patchPhase = ''
       runHook prePatch
 
+      substituteInPlace configgen/batoceraFiles.py \
+        --replace-fail "retroarchCores = \"/usr/lib/libretro/\"" "retroarchCores = \"/run/current-system/sw/lib/retroarch/cores/\""
       find ./ -type f -exec sed -i -e 's|/usr/share/|/run/current-system/sw/share/|g' {} \;
+      find ./ -type f -exec sed -i -e 's|/usr/bin/|/run/current-system/sw/bin/|g' {} \;
+      find ./ -type f -exec sed -i -e 's|/usr/lib/libretro|/run/current-system/sw/lib/retroarch|g' {} \;
 
       runHook postPatch
     '';
@@ -52,7 +56,11 @@ stdenv.mkDerivation (finalAttrs: {
     runHook prePatch
 
     pushd package/batocera/core/batocera-configgen/configgen
+    substituteInPlace configgen/batoceraFiles.py \
+      --replace-fail "retroarchCores = \"/usr/lib/libretro/\"" "retroarchCores = \"/run/current-system/sw/lib/retroarch/cores/\""
     find . -type f -exec sed -i -e 's|/usr/share/|/run/current-system/sw/share/|g' {} \;
+    find . -type f -exec sed -i -e 's|/usr/bin/|/run/current-system/sw/bin/|g' {} \;
+    find . -type f -exec sed -i -e 's|/usr/lib/libretro|/run/current-system/sw/lib/retroarch|g' {} \;
     popd
 
     runHook postPatch

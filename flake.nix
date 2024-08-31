@@ -76,10 +76,10 @@
                     (final: prev: {
                       batocera = pkgs.callPackage ./packages/batocera { inherit batocera-src; };
                       batocera-resolution = pkgs.callPackage ./packages/batocera/core/batocera-resolution { inherit batocera-src; };
-
-                      emulationstation-batocera = pkgs.callPackage ./overlays/emulationstation-batocera { };
-
                       batocera-settings = pkgs.callPackage ./packages/batocera/core/batocera-settings { inherit batocera-src; };
+
+                      mangohud = pkgs.callPackage ./packages/batocera/utils/mangohud { inherit batocera-src; };
+                      emulationstation-batocera = pkgs.callPackage ./overlays/emulationstation-batocera { };
                     })
                   ];
                 };
@@ -288,6 +288,7 @@
                       pkgs.batocera-resolution
                       pkgs.batocera-settings
 
+                      pkgs.mangohud
                       pkgs.emulationstation-batocera
                     ];
 
