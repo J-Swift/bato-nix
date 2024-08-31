@@ -77,6 +77,7 @@
                       batocera = pkgs.callPackage ./packages/batocera { inherit batocera-src; };
                       batocera-resolution = pkgs.callPackage ./packages/batocera/core/batocera-resolution { inherit batocera-src; };
                       batocera-settings = pkgs.callPackage ./packages/batocera/core/batocera-settings { inherit batocera-src; };
+                      batocera-scripts = pkgs.callPackage ./packages/batocera/core/batocera-scripts { inherit batocera-src; };
 
                       mangohud = pkgs.callPackage ./packages/batocera/utils/mangohud { inherit batocera-src; };
                       emulationstation-batocera = pkgs.callPackage ./overlays/emulationstation-batocera { };
@@ -287,9 +288,11 @@
                       pkgs.batocera
                       pkgs.batocera-resolution
                       pkgs.batocera-settings
+                      pkgs.batocera-scripts
 
                       pkgs.mangohud
                       pkgs.emulationstation-batocera
+                      pkgs.vulkan-tools
                     ];
 
                     bato.systems.psx.enable = true;
