@@ -1,5 +1,18 @@
 {
   "nodes": {
+    "batocera-buildroot-config": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1,
+        "narHash": "sha256-FUYkZ5jNCzoDfv387LTRJgp/9Yp7jSZ97NPyWKO34gw=",
+        "path": "./.config",
+        "type": "path"
+      },
+      "original": {
+        "path": "./.config",
+        "type": "path"
+      }
+    },
     "batocera-src": {
       "flake": false,
       "locked": {
@@ -110,6 +123,7 @@
     },
     "root": {
       "inputs": {
+        "batocera-buildroot-config": "batocera-buildroot-config",
         "batocera-src": "batocera-src",
         "flake-utils": "flake-utils",
         "nixinate": "nixinate",

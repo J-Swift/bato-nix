@@ -1,5 +1,7 @@
 # TODO(jpr): batocera-config
-# TODO(jpr): magnohud
+# TODO(jpr): kconfig?
+# TODO(jpr): gpu performance
+# TODO(jpr): conman
 {
   description = "Bato-nix";
 
@@ -22,9 +24,14 @@
       url = "github:batocera-linux/batocera.linux?ref=batocera-39";
       flake = false;
     };
+
+    batocera-buildroot-config = {
+      url = "path:./.config";
+      flake = false;
+    };
   };
 
-  outputs = { self, nixpkgs, flake-utils, nixos-generators, nixinate, batocera-src }:
+  outputs = { self, nixpkgs, flake-utils, nixos-generators, nixinate, batocera-src, batocera-buildroot-config }:
     flake-utils.lib.eachDefaultSystem
       (eachSystem:
         let
@@ -41,6 +48,18 @@
           bato-system = "x86_64-linux";
           hostname = "bato-nix";
           stateVersion = "24.11";
+
+          batocera-buildroot-lines = pkgs.lib.strings.splitString "\n" (builtins.readFile batocera-buildroot-config);
+          batocera-buildroot-valid-lines = builtins.filter
+            # ignore empty lines and comments
+            (it: !(it == "" || (pkgs.lib.strings.hasPrefix "#" it)))
+            batocera-buildroot-lines;
+          mapped-lines = builtins.map (it:
+            let
+              split = pkgs.lib.strings.split "=" it;
+            in
+            { name = builtins.elemAt split 0; value = builtins.elemAt split 2; });
+          batocera-config-values = builtins.listToAttrs mapped-lines;
         in
         {
           ${hostname} =
@@ -300,7 +319,7 @@
                   }
                 ];
 
-                specialArgs = { inherit batocera-src; };
+                specialArgs = { inherit batocera-src batocera-config-values; };
               };
         };
     };
