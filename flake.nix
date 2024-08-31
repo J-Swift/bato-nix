@@ -67,6 +67,7 @@
                     (final: prev: {
                       emulationstation-batocera = pkgs.callPackage ./overlays/emulationstation-batocera { };
                       batocera = pkgs.callPackage ./packages/batocera { inherit batocera-src; };
+                      batocera-shaders = pkgs.callPackage ./profiles/systems/retroarch/shaders/batocera-shaders { inherit batocera-src; };
                     })
                   ];
                 };
@@ -273,6 +274,7 @@
                     environment.systemPackages = [
                       pkgs.batocera
                       pkgs.emulationstation-batocera
+                      pkgs.batocera-shaders
                     ];
 
                     bato.systems.psx.enable = true;
