@@ -2,6 +2,7 @@
 # TODO(jpr): kconfig?
 # TODO(jpr): gpu performance
 # TODO(jpr): conman
+# TODO(jpr): evmapy
 {
   description = "Bato-nix";
 
@@ -43,66 +44,114 @@
         }
       ) //
     {
+      batocera-buildroot-config = batocera-buildroot-config;
       nixosConfigurations =
         let
-          bato-system = "x86_64-linux";
+          system = "x86_64-linux";
           hostname = "bato-nix";
           stateVersion = "24.11";
 
-          batocera-buildroot-lines = pkgs.lib.strings.splitString "\n" (builtins.readFile batocera-buildroot-config);
-          batocera-buildroot-valid-lines = builtins.filter
+          pkgs = import nixpkgs {
+            inherit system;
+
+            config.allowUnfree = true;
+            # emulationstation-batocera dependency
+            config.permittedInsecurePackages = [
+              "freeimage-unstable-2021-11-01"
+            ];
+
+            overlays = [
+              # buildroot
+              (final: prev: {
+                xorg = prev.xorg.overrideScope (xfinal: xprev: {
+                  xrandr = xprev.xrandr.overrideAttrs (finalAttrs: prevAttrs: {
+                    patches = (prevAttrs.patches or [ ]) ++ [
+                      "${batocera-src}/board/batocera/patches/xapp_xrandr/xapp_xrandr-001-listOutputs.patch"
+                      "${batocera-src}/board/batocera/patches/xapp_xrandr/xapp_xrandr-001-listResolutions.patch"
+                      "${batocera-src}/board/batocera/patches/xapp_xrandr/xapp_xrandr-002-getRotation.patch"
+                    ];
+                  });
+                });
+              })
+
+              # batocera.linux
+              (final: prev: {
+                batocera = pkgs.callPackage ./packages/batocera { inherit batocera-src; };
+                batocera-resolution = pkgs.callPackage ./packages/batocera/core/batocera-resolution { inherit batocera-src; };
+                batocera-settings = pkgs.callPackage ./packages/batocera/core/batocera-settings { inherit batocera-src; };
+                batocera-scripts = pkgs.callPackage ./packages/batocera/core/batocera-scripts { inherit batocera-src; };
+
+                mangohud = pkgs.callPackage ./packages/batocera/utils/mangohud { inherit batocera-src; };
+                emulationstation-batocera = pkgs.callPackage ./overlays/emulationstation-batocera { };
+              })
+            ];
+          };
+
+          batocera-buildroot-lines = (pkgs.lib.strings.splitString "\n" (builtins.readFile batocera-buildroot-config));
+          batocera-buildroot-valid-lines = (builtins.filter
             # ignore empty lines and comments
             (it: !(it == "" || (pkgs.lib.strings.hasPrefix "#" it)))
-            batocera-buildroot-lines;
-          mapped-lines = builtins.map (it:
+            batocera-buildroot-lines);
+          mapped-lines = (builtins.map
+            (it:
+              let
+                split = pkgs.lib.strings.split "=" it;
+              in
+              { name = builtins.elemAt split 0; value = builtins.elemAt split 2; })
+            batocera-buildroot-valid-lines);
+          batocera-config-values = (builtins.listToAttrs mapped-lines);
+
+          BR-get-all = (keys: pkgs.lib.attrsets.filterAttrs (k: v: builtins.elem k keys) batocera-config-values);
+          BR-get-all-vals = (keys: builtins.attrValues (BR-get-all keys));
+          BR-enabled = (vals:
             let
-              split = pkgs.lib.strings.split "=" it;
+              all-vals = (BR-get-all vals);
             in
-            { name = builtins.elemAt split 0; value = builtins.elemAt split 2; });
-          batocera-config-values = builtins.listToAttrs mapped-lines;
+            (((builtins.length (builtins.attrValues all-vals)) == builtins.length vals) && (builtins.all (it: it == "y") (builtins.attrValues all-vals))));
         in
         {
           ${hostname} =
             let
             in nixpkgs.lib.nixosSystem
               rec {
-                system = bato-system;
+                inherit system pkgs;
+                # system = bato-system;
 
-                pkgs = import nixpkgs {
-                  inherit system;
+                # pkgs = import nixpkgs {
+                #   inherit system;
 
-                  config.allowUnfree = true;
-                  # emulationstation-batocera dependency
-                  config.permittedInsecurePackages = [
-                    "freeimage-unstable-2021-11-01"
-                  ];
+                #   config.allowUnfree = true;
+                #   # emulationstation-batocera dependency
+                #   config.permittedInsecurePackages = [
+                #     "freeimage-unstable-2021-11-01"
+                #   ];
 
-                  overlays = [
-                    # buildroot
-                    (final: prev: {
-                      xorg = prev.xorg.overrideScope (xfinal: xprev: {
-                        xrandr = xprev.xrandr.overrideAttrs (finalAttrs: prevAttrs: {
-                          patches = (prevAttrs.patches or [ ]) ++ [
-                            "${batocera-src}/board/batocera/patches/xapp_xrandr/xapp_xrandr-001-listOutputs.patch"
-                            "${batocera-src}/board/batocera/patches/xapp_xrandr/xapp_xrandr-001-listResolutions.patch"
-                            "${batocera-src}/board/batocera/patches/xapp_xrandr/xapp_xrandr-002-getRotation.patch"
-                          ];
-                        });
-                      });
-                    })
+                #   overlays = [
+                #     # buildroot
+                #     (final: prev: {
+                #       xorg = prev.xorg.overrideScope (xfinal: xprev: {
+                #         xrandr = xprev.xrandr.overrideAttrs (finalAttrs: prevAttrs: {
+                #           patches = (prevAttrs.patches or [ ]) ++ [
+                #             "${batocera-src}/board/batocera/patches/xapp_xrandr/xapp_xrandr-001-listOutputs.patch"
+                #             "${batocera-src}/board/batocera/patches/xapp_xrandr/xapp_xrandr-001-listResolutions.patch"
+                #             "${batocera-src}/board/batocera/patches/xapp_xrandr/xapp_xrandr-002-getRotation.patch"
+                #           ];
+                #         });
+                #       });
+                #     })
 
-                    # batocera.linux
-                    (final: prev: {
-                      batocera = pkgs.callPackage ./packages/batocera { inherit batocera-src; };
-                      batocera-resolution = pkgs.callPackage ./packages/batocera/core/batocera-resolution { inherit batocera-src; };
-                      batocera-settings = pkgs.callPackage ./packages/batocera/core/batocera-settings { inherit batocera-src; };
-                      batocera-scripts = pkgs.callPackage ./packages/batocera/core/batocera-scripts { inherit batocera-src; };
+                #     # batocera.linux
+                #     (final: prev: {
+                #       batocera = pkgs.callPackage ./packages/batocera { inherit batocera-src; };
+                #       batocera-resolution = pkgs.callPackage ./packages/batocera/core/batocera-resolution { inherit batocera-src; };
+                #       batocera-settings = pkgs.callPackage ./packages/batocera/core/batocera-settings { inherit batocera-src; };
+                #       batocera-scripts = pkgs.callPackage ./packages/batocera/core/batocera-scripts { inherit batocera-src; };
 
-                      mangohud = pkgs.callPackage ./packages/batocera/utils/mangohud { inherit batocera-src; };
-                      emulationstation-batocera = pkgs.callPackage ./overlays/emulationstation-batocera { };
-                    })
-                  ];
-                };
+                #       mangohud = pkgs.callPackage ./packages/batocera/utils/mangohud { inherit batocera-src; };
+                #       emulationstation-batocera = pkgs.callPackage ./overlays/emulationstation-batocera { };
+                #     })
+                #   ];
+                # };
 
                 modules = [
                   {
@@ -319,7 +368,7 @@
                   }
                 ];
 
-                specialArgs = { inherit batocera-src batocera-config-values; };
+                specialArgs = { inherit batocera-src batocera-config-values BR-enabled; };
               };
         };
     };
